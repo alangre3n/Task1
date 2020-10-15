@@ -2,13 +2,14 @@ package ru.dexsys;
 
 import io.restassured.RestAssured;
 import io.restassured.filter.log.LogDetail;
+import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 
 import static io.restassured.RestAssured.given;
 
 public class RestfulBooker {
     private static final String authUri = "https://restful-booker.herokuapp.com/auth";
-    private static final String createBookingUri = "https://restful-booker.herokuapp.com/booking";
+    private static final String createBookingUri = "https://restful-booker.herokuapp.com/booking/";
     private static int idOrder = 0;
     private static JsonPath idJsonFirst;
 
@@ -32,7 +33,7 @@ public class RestfulBooker {
     public static void authorization(){
        RestAssured.given()
                 .body(authBody)
-                .contentType("application/json")
+                .contentType(ContentType.JSON)
                 .post(authUri)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
@@ -42,7 +43,7 @@ public class RestfulBooker {
     public static void createBooking(){
         idJsonFirst = given()
                 .body(createBookingBody)
-                .contentType("application/json")
+                .contentType(ContentType.JSON)
                 .post(createBookingUri)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
@@ -50,14 +51,13 @@ public class RestfulBooker {
                 .extract()
                 .response()
                 .jsonPath();
-
         idOrder = idJsonFirst.getInt("bookingid");
     }
 
     public static void checkBooking(){
         JsonPath idJsonSecond = given()
-                .contentType("application/json")
-                .get("https://restful-booker.herokuapp.com/booking/" + idOrder)
+                .contentType(ContentType.JSON)
+                .get(createBookingUri + idOrder)
                 .then()
                 .log().ifValidationFails(LogDetail.ALL)
                 .extract()
